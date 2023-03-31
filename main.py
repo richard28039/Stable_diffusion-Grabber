@@ -1,21 +1,42 @@
 import os
 import requests
+import time
 from selenium import webdriver
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.keys import Keys
 
-import time
+
 
 if __name__ == '__main__':
 
     #Stable Difussion
     url='http://127.0.0.1:7860'
 
+#v1-5 model
+
     #檔案路徑
-    Input=r"C:\f_CPBL\Input_picture"
-    Output=r"C:\f_CPBL\Output_picture"
+    Input=['C:/f_CPBL/Input_picture','C:/f_CPBL/3D_Style']
+    Output=['C:/f_CPBL/3D_Style','C:/f_CPBL/GTA_Style']
     file_name=['兄弟','味全','統一','富邦','樂天','隊徽']
+
+    #模型名稱
+    model_name=['v1-5-pruned-emaonly.safetensors [6ce0161689]','gta5ArtworkDiffusion_v1.ckpt [607aa02fb8]']
+
+    #Seed
+    Seed_num=['12345','1']
+
+    #跟源圖差多少
+    Denoising_num=['0.2','0.3']
+
+    #咒語
+    Promts=['The face feature and skin color should similar to origin, male,same hair and beard color , 8k uhd, dslr, soft lighting, high quality, film grain, Fujifilm XT3',
+            'gtav style,same color to origin picture, television series,same hat icon, baseball player, man, perfect face, perfect eyes']
+
+    #不要做的咒語
+    Negative_Prompts=['(semi-realistic, cgi, 3d, render, sketch, cartoon, drawing, anime:1.4), text, close up, cropped, out of frame, worst quality, low quality, jpg artifacts, ugly, duplicate, morbid, mutilated, extra fingers, mutated hands, poorly drawn hands, poorly drawn face, mutation, deformed, blurry, dehydrated, bad anatomy, bad proportions, extra limbs, cloned face, disfigured, gross proportions, malformed limbs, missing arms, missing legs, extra arms, extra legs, fused fingers, too many fingers, long neck,nose ring',
+                      'woman, child, teen, kid,tatoo, underage, deformed, ugly, hideous, lacklustre, malformed, glossy, doll, cgi, unrealistic, poorly drawn, bad quality, lowres, big tits, busty, huge breasts, duplicate, morbid, mutilated, out of frame, extra fingers, mutated hands, poorly drawn hands, poorly drawn face, mutation, deformed, blurry, bad anatomy, bad proportions, extra limbs, cloned face, disfigured, gross proportions, malformed limbs, missing arms, missing legs, extra arms, extra legs, fused fingers, too many fingers, long neck, poorly Rendered face, poorly drawn face, poor facial details, poorly drawn hands, poorly rendered hands, low resolution, bad composition, mutated body parts, blurry image, disfigured, oversaturated, bad anatomy, deformed body feature']
+
 
     Browser=webdriver.Chrome(service=Service("chromedriver.exe"))
     Browser.get(url)
@@ -29,28 +50,28 @@ if __name__ == '__main__':
     #調整參數
     Select_element=Browser.execute_script("return document.querySelector('body > gradio-app').shadowRoot.querySelector('#setting_sd_model_checkpoint > label > select')")
     Sel=Select(Select_element)
-    Sel.select_by_value("v1-5-pruned-emaonly.safetensors [6ce0161689]")
+    Sel.select_by_value(model_name[1])
 
     Crop_and_Resize=Browser.execute_script("return document.querySelector('body > gradio-app').shadowRoot.querySelector('#resize_mode > div.flex.flex-wrap.gap-2 > label:nth-child(2)')")
     Crop_and_Resize.click()
 
     Denoising_Strength=Browser.execute_script("return document.querySelector('body > gradio-app').shadowRoot.querySelector('#img2img_denoising_strength > div.w-full.flex.flex-col > div > input')")
     Denoising_Strength.clear()
-    Denoising_Strength.send_keys('0.3')
+    Denoising_Strength.send_keys(Denoising_num[1])
 
     Seed=Browser.execute_script("return document.querySelector('body > gradio-app').shadowRoot.querySelector('#img2img_seed > label > input')")
     Seed.clear()
-    Seed.send_keys('12345')
+    Seed.send_keys(Seed_num[1])
 
     Prompt= Browser.execute_script("return document.querySelector('body > gradio-app').shadowRoot.querySelector('#img2img_prompt > label > textarea')")
-    Prompt.send_keys('The face feature and skin color should similar to origin, male,same hair and beard color , 8k uhd, dslr, soft lighting, high quality, film grain, Fujifilm XT3')
+    Prompt.send_keys(Promts[1])
 
     Negative_Prompt=Browser.execute_script("return document.querySelector('body > gradio-app').shadowRoot.querySelector('#img2img_neg_prompt > label > textarea')")
-    Negative_Prompt.send_keys('(semi-realistic, cgi, 3d, render, sketch, cartoon, drawing, anime:1.4), text, close up, cropped, out of frame, worst quality, low quality, jpg artifacts, ugly, duplicate, morbid, mutilated, extra fingers, mutated hands, poorly drawn hands, poorly drawn face, mutation, deformed, blurry, dehydrated, bad anatomy, bad proportions, extra limbs, cloned face, disfigured, gross proportions, malformed limbs, missing arms, missing legs, extra arms, extra legs, fused fingers, too many fingers, long neck,nose ring')
+    Negative_Prompt.send_keys(Negative_Prompts[1])
 
     for name in file_name:
-        Input_path=os.path.join(Input,name)
-        Output_path=os.path.join(Output,name)
+        Input_path=os.path.join(Input[1],name)
+        Output_path=os.path.join(Output[1],name)
         Jpg_files = os.listdir(Input_path)
         Jpg_files.sort(key=lambda x:int(x.split("_")[0]))
         print(Jpg_files)
